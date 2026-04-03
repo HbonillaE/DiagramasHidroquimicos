@@ -1,0 +1,20 @@
+[general]
+name=DiagramasHidroquimicos
+qgisMinimumVersion=3.22
+qgisMaximumVersion=3.99
+description=Genera diagramas de Piper, Gibbs y Stiff para analisis hidroquimico
+version=1.0.0
+author=Bonilla (2026)
+email=bonillajoel145@gmail.com
+about=Plugin para generar diagramas hidroquimicos (Piper, Gibbs, Stiff) a partir de datos Excel.
+      Exporta diagramas Piper y Gibbs como HTML interactivo (Plotly) y Stiff como Shapefile o GeoPackage.
+      Requiere columnas: Pozo/ID, X, Y, Ca, Mg, Na, K, HCO3, CO3, SO4, Cl, TDS en el Excel.
+
+tracker=https://github.com/tu_usuario/DiagramasHidroquimicos/issues
+repository=https://github.com/tu_usuario/DiagramasHidroquimicos
+tags=hydrochemistry,piper,gibbs,stiff,groundwater,water quality
+homepage=https://github.com/tu_usuario/DiagramasHidroquimicos
+category=Analysis
+icon=icon.png
+experimental=False
+deprecated=False
