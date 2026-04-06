@@ -179,7 +179,7 @@ class DiagramasDialog(QDialog):
         layout.setContentsMargins(10, 10, 10, 10)
 
         info = QLabel(
-            'El diagrama de Piper se genera en Plotly (HTML interactivo).\n'
+            'El diagrama de Piper se genera en Plotly (HTML interactivo) o como imagen PNG.\n'
             'Primero carga y calcula los datos en la pestaña "Datos".'
         )
         info.setWordWrap(True)
@@ -194,17 +194,26 @@ class DiagramasDialog(QDialog):
         )
         btn_gen.clicked.connect(self._generate_piper)
 
-        btn_exp = QPushButton('💾  Exportar como HTML')
-        btn_exp.setStyleSheet(
+        btn_exp_html = QPushButton('🌐  Exportar como HTML')
+        btn_exp_html.setStyleSheet(
             'QPushButton { background:#2e86c1; color:white; padding:7px 18px; '
             'border-radius:4px; font-size:12px; }'
             'QPushButton:hover { background:#1a5276; }'
         )
-        btn_exp.clicked.connect(self._export_piper_html)
+        btn_exp_html.clicked.connect(self._export_piper_html)
+
+        btn_exp_png = QPushButton('🖼  Exportar como PNG')
+        btn_exp_png.setStyleSheet(
+            'QPushButton { background:#7d3c98; color:white; padding:7px 18px; '
+            'border-radius:4px; font-size:12px; }'
+            'QPushButton:hover { background:#5b2c6f; }'
+        )
+        btn_exp_png.clicked.connect(self._export_piper_png)
 
         brow = QHBoxLayout()
         brow.addWidget(btn_gen)
-        brow.addWidget(btn_exp)
+        brow.addWidget(btn_exp_html)
+        brow.addWidget(btn_exp_png)
         brow.addStretch()
         layout.addLayout(brow)
 
@@ -227,7 +236,7 @@ class DiagramasDialog(QDialog):
         layout.setContentsMargins(10, 10, 10, 10)
 
         info = QLabel(
-            'El diagrama de Gibbs se genera en Plotly (HTML interactivo).\n'
+            'El diagrama de Gibbs se genera en Plotly (HTML interactivo) o como imagen PNG.\n'
             'Primero carga y calcula los datos en la pestaña "Datos".'
         )
         info.setWordWrap(True)
@@ -242,17 +251,26 @@ class DiagramasDialog(QDialog):
         )
         btn_gen.clicked.connect(self._generate_gibbs)
 
-        btn_exp = QPushButton('💾  Exportar como HTML')
-        btn_exp.setStyleSheet(
+        btn_exp_html = QPushButton('🌐  Exportar como HTML')
+        btn_exp_html.setStyleSheet(
             'QPushButton { background:#2e86c1; color:white; padding:7px 18px; '
             'border-radius:4px; font-size:12px; }'
             'QPushButton:hover { background:#1a5276; }'
         )
-        btn_exp.clicked.connect(self._export_gibbs_html)
+        btn_exp_html.clicked.connect(self._export_gibbs_html)
+
+        btn_exp_png = QPushButton('🖼  Exportar como PNG')
+        btn_exp_png.setStyleSheet(
+            'QPushButton { background:#7d3c98; color:white; padding:7px 18px; '
+            'border-radius:4px; font-size:12px; }'
+            'QPushButton:hover { background:#5b2c6f; }'
+        )
+        btn_exp_png.clicked.connect(self._export_gibbs_png)
 
         brow = QHBoxLayout()
         brow.addWidget(btn_gen)
-        brow.addWidget(btn_exp)
+        brow.addWidget(btn_exp_html)
+        brow.addWidget(btn_exp_png)
         brow.addStretch()
         layout.addLayout(brow)
 
@@ -528,10 +546,35 @@ class DiagramasDialog(QDialog):
         from .diagrams.piper import export_piper_html
         try:
             export_piper_html(self.piper_fig, path)
-            self.txt_piper_log.append(f'💾 HTML exportado: {path}')
+            self.txt_piper_log.append(f'🌐 HTML exportado: {path}')
             self._set_status(f'Piper exportado → {os.path.basename(path)}')
         except Exception:
-            self.txt_piper_log.append('❌ Error al exportar:\n' + traceback.format_exc())
+            self.txt_piper_log.append('❌ Error al exportar HTML:\n' + traceback.format_exc())
+
+    def _export_piper_png(self):
+        """Exporta el diagrama de Piper como imagen PNG usando matplotlib."""
+        if self.piper_fig is None:
+            QMessageBox.warning(self, 'Sin figura', 'Genera el diagrama de Piper primero.')
+            return
+        # Necesitamos piper_data para el PNG; lo regeneramos desde meq_df
+        if self.meq_df is None:
+            QMessageBox.warning(self, 'Sin datos', 'Carga los datos en la pestaña "Datos".')
+            return
+        path, _ = QFileDialog.getSaveFileName(
+            self, 'Guardar Diagrama de Piper como PNG', 'piper.png', 'PNG (*.png)'
+        )
+        if not path:
+            return
+        from .core.calculations import to_percent
+        from .diagrams.piper import transform_piper_data, export_piper_png
+        try:
+            data_pct = to_percent(self.meq_df)
+            piper_data = transform_piper_data(data_pct)
+            export_piper_png(piper_data, path, dpi=150)
+            self.txt_piper_log.append(f'🖼 PNG exportado: {path}')
+            self._set_status(f'Piper PNG exportado → {os.path.basename(path)}')
+        except Exception:
+            self.txt_piper_log.append('❌ Error al exportar PNG:\n' + traceback.format_exc())
 
     # ===================================================================
     # Acciones – Gibbs
@@ -566,10 +609,28 @@ class DiagramasDialog(QDialog):
         from .diagrams.gibbs import export_gibbs_html
         try:
             export_gibbs_html(self.gibbs_fig, path)
-            self.txt_gibbs_log.append(f'💾 HTML exportado: {path}')
+            self.txt_gibbs_log.append(f'🌐 HTML exportado: {path}')
             self._set_status(f'Gibbs exportado → {os.path.basename(path)}')
         except Exception:
-            self.txt_gibbs_log.append('❌ Error al exportar:\n' + traceback.format_exc())
+            self.txt_gibbs_log.append('❌ Error al exportar HTML:\n' + traceback.format_exc())
+
+    def _export_gibbs_png(self):
+        """Exporta el diagrama de Gibbs como imagen PNG usando matplotlib."""
+        if self.mmol_df is None:
+            QMessageBox.warning(self, 'Sin datos', 'Carga los datos en la pestaña "Datos".')
+            return
+        path, _ = QFileDialog.getSaveFileName(
+            self, 'Guardar Diagrama de Gibbs como PNG', 'gibbs.png', 'PNG (*.png)'
+        )
+        if not path:
+            return
+        from .diagrams.gibbs import export_gibbs_png
+        try:
+            export_gibbs_png(self.mmol_df, path, dpi=150)
+            self.txt_gibbs_log.append(f'🖼 PNG exportado: {path}')
+            self._set_status(f'Gibbs PNG exportado → {os.path.basename(path)}')
+        except Exception:
+            self.txt_gibbs_log.append('❌ Error al exportar PNG:\n' + traceback.format_exc())
 
     # ===================================================================
     # Acciones – Stiff
